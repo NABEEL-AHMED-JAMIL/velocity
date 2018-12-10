@@ -11,50 +11,55 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
+
 public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
     private static final Logger logger = LogManager.getLogger(GZIPResponseWrapper.class);
 
-    private GZIPResponseStream gzipResponse;
-    private ServletOutputStream servletOutputStream;
-    private PrintWriter printWriter;
+    protected HttpServletResponse origResponse;
+    protected ServletOutputStream stream;
+    protected PrintWriter writer;
 
     public GZIPResponseWrapper(HttpServletResponse response) {
         super(response);
-        response.addHeader("Content-Encoding", "gzip");
+        origResponse = response;
     }
 
-    public void finish() throws IOException {
+    public ServletOutputStream createOutputStream() throws IOException {
+        return (new GZIPResponseStream(origResponse));
+    }
 
-        if(this.printWriter != null) { this.printWriter.close(); }
-
-        if(this.servletOutputStream != null) { this.servletOutputStream.close(); }
-
-        if(this.gzipResponse != null) { this.gzipResponse.close(); }
+    public void finishResponse() {
+        try {
+            if (writer != null) { writer.close(); } else if (stream != null) { stream.close(); }
+        } catch (IOException e) {
+        }
     }
 
     @Override
+    public void flushBuffer() throws IOException { stream.flush(); }
+
+    @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        if(this.servletOutputStream == null) {
-            this.gzipResponse = new GZIPResponseStream(getResponse().getOutputStream());
-            this.servletOutputStream = gzipResponse;
-        }
-        return this.servletOutputStream;
+
+        if (writer != null) { throw new IllegalStateException("getWriter() has already been called!"); }
+        if (stream == null) { stream = createOutputStream(); }
+
+        return (stream);
     }
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        if(this.printWriter == null) {
-            this.gzipResponse = new GZIPResponseStream(getResponse().getOutputStream());
-            this.printWriter = new PrintWriter(new OutputStreamWriter(this.gzipResponse, getResponse().getCharacterEncoding()));
-        }
-        return this.printWriter;
+
+        if (writer != null) { return (writer); }
+        if (stream != null) { throw new IllegalStateException("getOutputStream() has already been called!"); }
+
+        stream = createOutputStream();
+        writer = new PrintWriter(new OutputStreamWriter(stream, HEADERS.UTF_8));
+        return (writer);
     }
 
     @Override
-    public void flushBuffer() throws IOException {
-        if(this.printWriter != null) { this.printWriter.flush(); }
-        if(this.servletOutputStream != null) { this.servletOutputStream.flush(); }
-        super.flushBuffer();
-    }
+    public void setContentLength(int length) { }
+
 }

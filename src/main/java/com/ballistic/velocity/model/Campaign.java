@@ -2,6 +2,7 @@ package com.ballistic.velocity.model;
 
 public class Campaign {
 
+    private String id;
     private String campaignId;
     private String adId;
 
@@ -12,6 +13,15 @@ public class Campaign {
         this.adId = adId;
     }
 
+    public Campaign(String id, String campaignId, String adId) {
+        this.id = id;
+        this.campaignId = campaignId;
+        this.adId = adId;
+    }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
     public String getCampaignId() { return campaignId; }
     public void setCampaignId(String campaignId) { this.campaignId = campaignId; }
 
@@ -20,6 +30,6 @@ public class Campaign {
 
     @Override
     public String toString() {
-        return "Campaign{" + "campaignId='" + campaignId + '\'' + ", adId='" + adId + '\'' + '}';
+        return "Campaign{" + "id='" + id + '\'' + ", campaignId='" + campaignId + '\'' + ", adId='" + adId + '\'' + '}';
     }
 }

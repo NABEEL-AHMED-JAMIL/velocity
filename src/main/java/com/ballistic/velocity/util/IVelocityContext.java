@@ -30,5 +30,4 @@ public interface IVelocityContext {
 
         return velocityContext;
     }
-
 }

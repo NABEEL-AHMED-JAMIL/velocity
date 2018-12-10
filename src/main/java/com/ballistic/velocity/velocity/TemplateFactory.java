@@ -57,7 +57,5 @@ public class TemplateFactory extends VelocityWriter {
             return this.getWriter();
         }
         throw new NullPointerException("Template Not Found");
-
     }
-
 }

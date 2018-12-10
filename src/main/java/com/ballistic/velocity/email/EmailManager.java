@@ -46,22 +46,26 @@ public class EmailManager {
         return props;
     }
 
-
+    /**
+     * Note :- if email set not proved then
+     * */
     private boolean sendMail(EmailContent emailContent) {
         try {
             Message message = new MimeMessage(getSession());
             message.setFrom(new InternetAddress(SenderEmail.USER_ID));
-            // send to's
             if(emailContent.getSendTo() != null && emailContent.getSendTo().size() > 0) {
+                // * * * * * * * * * * *Send to's* * * * * * * * *
                 String sendTo = emailContent.getSendTo().toString();
                 sendTo = sendTo.substring(1, sendTo.length()-1);
                 logger.debug("Send To :- "  + sendTo);
+                // * * * * * * * * * * * * * * * * * * * * * * * *
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendTo));
-                // send cc's
                 if (emailContent.getCcTo() != null && emailContent.getCcTo().size() > 0) {
+                    // * * * * * * * * *Send cc's* * * * * * * * *
                     String ccSendTo = emailContent.getCcTo().toString();
                     ccSendTo = ccSendTo.substring(1, ccSendTo.length()-1);
                     logger.debug("Send Cc :- "  + ccSendTo);
+                    // * * * * * * * * * * * * * * * * * * * * * * *
                     message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(ccSendTo));
                 }
                 message.setSubject(emailContent.getSubject());
