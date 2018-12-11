@@ -1,27 +1,21 @@
 package com.ballistic.velocity.config;
 
-import com.ballistic.velocity.email.EmailManager;
 import com.ballistic.velocity.gzip.GZIPFilter;
-import com.ballistic.velocity.velocity.TemplateFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /* * * * * * * * * * * * * * * * * *
  * Note :- BeanConfig Section Done *
  * * * * * * * * * * * * * * * * * */
 @Configuration
+//@ComponentScan({"com.ballistic.velocity.bean.view", "com.ballistic.velocity.bean.email"})
 public class BeanConfig {
 
     private static final Logger logger = LogManager.getLogger(BeanConfig.class);
-
-    @Bean({"emailManager"})
-    public EmailManager emailManager() { return new EmailManager(); }
-
-    @Bean({"templateFactory"})
-    public TemplateFactory templateFactory() { return new TemplateFactory(); }
 
     @Bean
     public FilterRegistrationBean <GZIPFilter> filterRegistrationBean() {

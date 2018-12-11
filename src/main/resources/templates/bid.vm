@@ -1,0 +1,15 @@
+{
+   "bid": {
+            #if($campaign.getId())
+              "id" : "$campaign.getId()"
+              #if($campaign.getAdId() || $campaign.getCampaignId()),#end
+            #end
+ 	   	    #if($campaign.getCampaignId())
+               "campaignId" : "$campaign.getCampaignId()"
+               #if($campaign.getAdId()),#end
+ 	   	    #end
+ 	   	    #if($campaign.getAdId())
+ 	   	       "adId" : "$campaign.getAdId()"
+ 	   	    #end
+ 	   	 }
+}

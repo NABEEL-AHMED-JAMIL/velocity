@@ -27,20 +27,16 @@ public class GZIPFilter implements Filter {
         if(servletRequest instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest) servletRequest;
             HttpServletResponse response = (HttpServletResponse) servletResponse;
-            System.out.println("Request " + request.getHeader(HttpHeaders.ACCEPT_ENCODING));
             logger.debug("Header's Request :- " + getRequestHeader(request));
-            // gzip setting in gzip-resposne-wrapper
             if(request.getHeader(HEADERS.ACCEPT_ENCODING) != null && request.getHeader(HEADERS.ACCEPT_ENCODING).indexOf(HEADERS.ACZ) != -1) {
                 response.setHeader(HEADERS.ACCESS_CONTROL_ALLOW_ORIGIN, HEADERS.ACCESS_CONTROL_ALLOW_ALL);
                 response.setHeader(HEADERS.ACCESS_CONTROL_ALLOW_METHODS, HEADERS.ACCESS_CONTROL_ALLOW_METHODS_ALL);
                 response.setHeader(HEADERS.ACCESS_CONTROL_MAX_AGE, HEADERS.MAX_AGE);
                 response.setHeader(HEADERS.ACCESS_CONTROL_ALLOW_HEADERS, HEADERS.ACCESS_CONTROL_ALLOW_HEADERS_);
                 if(request.getHeader(HEADERS.X_ADMAXIM_MODE) != null && request.getHeader(HEADERS.X_ADMAXIM_MODE).indexOf(HEADERS.X_TEST_MODE) != -1) {
-                    // send back the X_ADMAXIM_MODE: dev-true
                     response.setHeader(HEADERS.X_ADMAXIM_MODE, HEADERS.X_TEST_MODE+"-test");
                 }
                 if(request.getHeader(HEADERS.X_OPENRTB_VERSION) != null && request.getHeader(HEADERS.X_OPENRTB_VERSION).indexOf(HEADERS.X_OPEN_VER) != -1) {
-                    // send back the X_OPENRTB_VERSION: version accept
                     response.setHeader(HEADERS.X_OPENRTB_VERSION, HEADERS.X_OPEN_VER+" accept");
                 }
                 this.gzipResponse = new GZIPResponseWrapper(response);
@@ -53,16 +49,11 @@ public class GZIPFilter implements Filter {
         }
     }
 
-    /** nope */
-    @Override
-    public void destroy() { logger.debug("########## Destroying CustomURLFilter filter ##########"); }
-
-    /**
+    /* *
      * Note :- only use for print the log's
      * */
     private String getRequestHeader(HttpServletRequest request) {
         StringBuilder builder = new StringBuilder();
-
         if(request.getHeader(HEADERS.ACCEPT_ENCODING) != null && request.getHeader(HEADERS.ACCEPT_ENCODING).indexOf(HEADERS.ACZ) != -1) {
             builder.append("(").
                     append(HEADERS.ACCEPT_ENCODING).
@@ -88,13 +79,11 @@ public class GZIPFilter implements Filter {
         return builder.toString();
     }
 
-    /**
+    /* *
      * Note :- only use for print the log's
      * */
     private String getResponseHeader(HttpServletResponse response) {
-
         StringBuilder builder = new StringBuilder();
-
         if(response.getHeader(HEADERS.ACCESS_CONTROL_ALLOW_ORIGIN) != null && response.getHeader(HEADERS.ACCESS_CONTROL_ALLOW_ORIGIN).indexOf(HEADERS.ACCESS_CONTROL_ALLOW_ALL) != -1) {
             builder.append("(").
                     append(HEADERS.ACCESS_CONTROL_ALLOW_ORIGIN).
@@ -147,4 +136,8 @@ public class GZIPFilter implements Filter {
 
         return builder.toString();
     }
+
+    /** nope */
+    @Override
+    public void destroy() { logger.debug("########## Destroying CustomURLFilter filter ##########"); }
 }
