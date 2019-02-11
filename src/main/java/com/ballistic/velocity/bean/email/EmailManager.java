@@ -1,13 +1,12 @@
 package com.ballistic.velocity.bean.email;
 
-import com.ballistic.velocity.bean.view.util.IVelocityContext;
+import com.ballistic.velocity.bean.view.IVelocityContext;
 import com.ballistic.velocity.bean.view.TemplateFactory;
 import com.ballistic.velocity.bean.view.TemplateType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -56,9 +55,9 @@ public class EmailManager {
         return props;
     }
 
-    /**
-     * Note :- if email set not proved then
-     * */
+    /* * * * * * * * * * * * * * * * * * * * *
+     * Note :- if email set not proved then  *
+     * * * * * * * * * * * * * * * * * * * * */
     private boolean sendMail(EmailContent emailContent) {
         try {
             Message message = new MimeMessage(getSession());
@@ -95,7 +94,6 @@ public class EmailManager {
             return false;
         }
     }
-
     /**
      * Note :- Velocity Template Writer here
      * */

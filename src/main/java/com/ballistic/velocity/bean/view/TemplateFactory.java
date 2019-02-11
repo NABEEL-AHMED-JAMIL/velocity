@@ -4,16 +4,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Properties;
 
 /* * * * * * * * * * * * * * * * * * * * *
  *  Note :- TemplateFactory Section Done *
@@ -25,6 +22,7 @@ public class TemplateFactory extends VelocityWriter {
 
     public static Template BID_TEMPLATE_PATH = null;
     public static Template EMAIL_TEMPLATE_PATH = null;
+    public static Template BAD_REQUEST_TEMPLATE_PATH = null;
 
     public TemplateFactory() { }
 
@@ -40,6 +38,8 @@ public class TemplateFactory extends VelocityWriter {
             BID_TEMPLATE_PATH = this.getEngine().getTemplate(VelocityWriter.BID_TEMPLATE_PATH);
             logger.debug("Emil-Template Path :- " + VelocityWriter.EMAIL_TEMPLATE_PATH);
             EMAIL_TEMPLATE_PATH = this.getEngine().getTemplate(VelocityWriter.EMAIL_TEMPLATE_PATH);
+            logger.debug("Bad-Request-Template Path :- " + VelocityWriter.BID_TEMPLATE_PATH);
+            BAD_REQUEST_TEMPLATE_PATH = this.getEngine().getTemplate(VelocityWriter.BAD_REQUEST_TEMPLATE_PATH);
         } catch (ExceptionInInitializerError ex) {
             logger.error("Error :- " + ex.getLocalizedMessage());
         } catch (ResourceNotFoundException ex) {
@@ -59,6 +59,10 @@ public class TemplateFactory extends VelocityWriter {
                 this.setWriter(new StringWriter());
                 template =  EMAIL_TEMPLATE_PATH;
                 break;
+            case BAD_REQUEST:
+                this.setWriter(new StringWriter());
+                template =  BAD_REQUEST_TEMPLATE_PATH;
+
         }
         return template;
     }
@@ -67,7 +71,7 @@ public class TemplateFactory extends VelocityWriter {
         Template template = getTemplate(templateType);
         if(template != null) {
             template.merge(context, this.getWriter());
-            logger.info("Response Content :- " + this.getWriter());
+            logger.info("Response Content :- " + this.getWriter().toString().replaceAll("\\s+",""));
             return this.getWriter();
         }
         throw new NullPointerException("Template Not Found");

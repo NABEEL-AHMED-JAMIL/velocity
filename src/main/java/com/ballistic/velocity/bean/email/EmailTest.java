@@ -1,8 +1,7 @@
 package com.ballistic.velocity.bean.email;
 
-import com.ballistic.velocity.model.Campaign;
+import com.ballistic.velocity.model.pojo.Document;
 import com.ballistic.velocity.model.CampaignMockup;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,10 +12,10 @@ public class EmailTest {
 
         while (true) {
             long startTime = System.currentTimeMillis();
-            Campaign campaign = CampaignMockup.getCampaignMockup();
+            Document document = CampaignMockup.getCampaignMockup();
 
             HashMap<String, Object> mailMessage = new HashMap<>();
-            mailMessage.put("BID_RESPONSE", String.format(EmailSubject.BID_RESPONSE, campaign.getCampaignId(), campaign.getAdId()));
+            mailMessage.put("BID_RESPONSE", String.format(EmailSubject.BID_RESPONSE, document.getCampaignId(), document.getAdId()));
 
             Set<String> sendTo = new HashSet<>();
             sendTo.add("***********@gmail.com");
@@ -27,7 +26,7 @@ public class EmailTest {
             EmailContent emailContent = new EmailContent();
             emailContent.setSendTo(sendTo);
             emailContent.setCcTo(sendCc);
-            emailContent.setSubject(String.format(EmailSubject.BID_RESPONSE, campaign.getCampaignId(), campaign.getAdId()));
+            emailContent.setSubject(String.format(EmailSubject.BID_RESPONSE, document.getCampaignId(), document.getAdId()));
             emailContent.setMailMessage(mailMessage);
             EmailManager emailManager = new EmailManager();
             System.out.println("Email Status :- " + emailManager.sendEmail(emailContent) + " Response Time :- " + (System.currentTimeMillis() - startTime) + ".ms");

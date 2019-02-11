@@ -1,13 +1,15 @@
 package com.ballistic.velocity.gzip;
 
+import com.ballistic.velocity.gzip.request.GZIPRequestWrapper;
+import com.ballistic.velocity.gzip.response.GZIPResponseWrapper;
+import com.ballistic.velocity.gzip.util.HEADERS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpHeaders;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
 
 /* * * * * * * * * * * * * * * * * * *  *
  * Note :- Filter for only specific api *
@@ -16,49 +18,84 @@ public class GZIPFilter implements Filter {
 
     private static final Logger logger = LogManager.getLogger(GZIPFilter.class);
 
-    private GZIPResponseWrapper gzipResponse;
-
     /** nope */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException { logger.debug("########## Initiating CustomURLFilter filter ##########"); }
 
     @Override
     public void doFilter(ServletRequest servletRequest,ServletResponse servletResponse,FilterChain filterChain) throws IOException, ServletException {
-        if(servletRequest instanceof HttpServletRequest) {
+
+        if (servletRequest instanceof HttpServletRequest) {
+
             HttpServletRequest request = (HttpServletRequest) servletRequest;
             HttpServletResponse response = (HttpServletResponse) servletResponse;
-            logger.debug("Header's Request :- " + getRequestHeader(request));
-            if(request.getHeader(HEADERS.ACCEPT_ENCODING) != null && request.getHeader(HEADERS.ACCEPT_ENCODING).indexOf(HEADERS.ACZ) != -1) {
-                response.setHeader(HEADERS.ACCESS_CONTROL_ALLOW_ORIGIN, HEADERS.ACCESS_CONTROL_ALLOW_ALL);
-                response.setHeader(HEADERS.ACCESS_CONTROL_ALLOW_METHODS, HEADERS.ACCESS_CONTROL_ALLOW_METHODS_ALL);
-                response.setHeader(HEADERS.ACCESS_CONTROL_MAX_AGE, HEADERS.MAX_AGE);
-                response.setHeader(HEADERS.ACCESS_CONTROL_ALLOW_HEADERS, HEADERS.ACCESS_CONTROL_ALLOW_HEADERS_);
-                if(request.getHeader(HEADERS.X_ADMAXIM_MODE) != null && request.getHeader(HEADERS.X_ADMAXIM_MODE).indexOf(HEADERS.X_TEST_MODE) != -1) {
-                    response.setHeader(HEADERS.X_ADMAXIM_MODE, HEADERS.X_TEST_MODE+"-test");
+            // this will help to check what pub sending in header
+            logger.debug("#-------------------------------------------------#");
+            this.disPlayAllHeader(request);
+            logger.debug("#-------------------------------------------------#");
+
+            try {
+
+                GZIPRequestWrapper requestWrapper = null;
+                GZIPResponseWrapper responseWrapper = null;
+
+                if (isGZipEncoded(request, HEADERS.CONTENT_ENCODING)) {
+                    logger.debug("GZIP Content-Encoding FOUND ......");
+                    requestWrapper = new GZIPRequestWrapper(request);
                 }
-                if(request.getHeader(HEADERS.X_OPENRTB_VERSION) != null && request.getHeader(HEADERS.X_OPENRTB_VERSION).indexOf(HEADERS.X_OPEN_VER) != -1) {
-                    response.setHeader(HEADERS.X_OPENRTB_VERSION, HEADERS.X_OPEN_VER+" accept");
+
+                if (isGZipEncoded(request, HEADERS.ACCEPT_ENCODING)) {
+                    logger.debug("GZip Process Accept-encoding FOUND ......");
+                    response.addHeader("Content-Encoding", "gzip");
+                    responseWrapper = new GZIPResponseWrapper(response);
                 }
-                this.gzipResponse = new GZIPResponseWrapper(response);
-                filterChain.doFilter(servletRequest, this.gzipResponse);
-                this.gzipResponse.finishResponse();
-                logger.debug("Header's Response :- " + getResponseHeader(response));
-                return;
+
+                if (requestWrapper == null && responseWrapper == null) {
+                    filterChain.doFilter(request, response);
+                } else {
+                    if (requestWrapper != null && responseWrapper != null) {
+                        filterChain.doFilter(requestWrapper, responseWrapper);
+                        responseWrapper.finishResponse();
+                    } else if (requestWrapper != null && responseWrapper == null) {
+                        filterChain.doFilter(requestWrapper, response);
+                    } else if (requestWrapper == null && responseWrapper != null) {
+                        filterChain.doFilter(request, responseWrapper);
+                        responseWrapper.finishResponse();
+                    }
+                }
+
+            }catch (Exception ex) {
+                logger.error("Error :- " + ex.getLocalizedMessage());
+                response.getWriter().print("<html><head><title>Oops An error happened!</title></head>");
+                response.getWriter().print("<body>Something bad happened uh-oh!");
+                response.getWriter().print("<br><h1>" + ex.getLocalizedMessage() + "</h1></body>");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("</html>");
             }
-            filterChain.doFilter(servletRequest, servletResponse);
         }
     }
 
-    /* *
-     * Note :- only use for print the log's
-     * */
+    private void disPlayAllHeader(HttpServletRequest request) {
+        Enumeration headerNames = request.getHeaderNames();
+        while(headerNames.hasMoreElements()) {
+            String headerName = (String)headerNames.nextElement();
+            logger.debug(headerName + " :- " + request.getHeader(headerName));
+        }
+    }
+
+    private Boolean isGZipEncoded(HttpServletRequest request, String encoded) {
+        String isEncoded = request.getHeader(encoded);
+        return isEncoded != null && isEncoded.indexOf(HEADERS.GZIP) != -1;
+    }
+
+    // Deprecate
     private String getRequestHeader(HttpServletRequest request) {
         StringBuilder builder = new StringBuilder();
-        if(request.getHeader(HEADERS.ACCEPT_ENCODING) != null && request.getHeader(HEADERS.ACCEPT_ENCODING).indexOf(HEADERS.ACZ) != -1) {
+        if(request.getHeader(HEADERS.ACCEPT_ENCODING) != null && request.getHeader(HEADERS.ACCEPT_ENCODING).indexOf(HEADERS.GZIP) != -1) {
             builder.append("(").
                     append(HEADERS.ACCEPT_ENCODING).
                     append(" -:- ").
-                    append(request.getHeader(HEADERS.ACCEPT_ENCODING).substring(request.getHeader(HEADERS.ACCEPT_ENCODING).indexOf(HEADERS.ACZ))).
+                    append(request.getHeader(HEADERS.ACCEPT_ENCODING).substring(request.getHeader(HEADERS.ACCEPT_ENCODING).indexOf(HEADERS.GZIP))).
                     append(")");
         }
         if(request.getHeader(HEADERS.X_ADMAXIM_MODE) != null && request.getHeader(HEADERS.X_ADMAXIM_MODE).indexOf(HEADERS.X_TEST_MODE) != -1) {
@@ -78,10 +115,7 @@ public class GZIPFilter implements Filter {
 
         return builder.toString();
     }
-
-    /* *
-     * Note :- only use for print the log's
-     * */
+    // Deprecate
     private String getResponseHeader(HttpServletResponse response) {
         StringBuilder builder = new StringBuilder();
         if(response.getHeader(HEADERS.ACCESS_CONTROL_ALLOW_ORIGIN) != null && response.getHeader(HEADERS.ACCESS_CONTROL_ALLOW_ORIGIN).indexOf(HEADERS.ACCESS_CONTROL_ALLOW_ALL) != -1) {
@@ -126,11 +160,11 @@ public class GZIPFilter implements Filter {
                     append(response.getHeader(HEADERS.X_OPENRTB_VERSION).substring(response.getHeader(HEADERS.X_OPENRTB_VERSION).indexOf(HEADERS.X_OPEN_VER+" accept"))).
                     append(")");
         }
-        if(response.getHeader(HEADERS.CONTENT_ENCODING) != null && response.getHeader(HEADERS.CONTENT_ENCODING).indexOf(HEADERS.ACZ) != -1) {
+        if(response.getHeader(HEADERS.CONTENT_ENCODING) != null && response.getHeader(HEADERS.CONTENT_ENCODING).indexOf(HEADERS.GZIP) != -1) {
             builder.append("(").
                     append(HEADERS.CONTENT_ENCODING).
                     append(" -:- ").
-                    append(response.getHeader(HEADERS.CONTENT_ENCODING).substring(response.getHeader(HEADERS.CONTENT_ENCODING).indexOf(HEADERS.ACZ))).
+                    append(response.getHeader(HEADERS.CONTENT_ENCODING).substring(response.getHeader(HEADERS.CONTENT_ENCODING).indexOf(HEADERS.GZIP))).
                     append(")");
         }
 

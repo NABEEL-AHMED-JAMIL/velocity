@@ -1,6 +1,6 @@
 package com.ballistic.velocity.model;
 
-
+import com.ballistic.velocity.model.pojo.Document;
 import java.util.Random;
 
 public interface CampaignMockup {
@@ -9,7 +9,7 @@ public interface CampaignMockup {
         return new Random().nextInt(10);
     }
 
-    public static Campaign getCampaignMockup() {
-        return new Campaign(String.valueOf(getRandomNumber()), String.valueOf(getRandomNumber()));
+    public static Document getCampaignMockup() {
+        return new Document(String.valueOf(getRandomNumber()), String.valueOf(getRandomNumber()));
     }
 }

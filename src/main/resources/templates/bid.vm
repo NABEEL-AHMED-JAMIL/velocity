@@ -1,7 +1,7 @@
 {
    "bid": {
-            #if($campaign.getId())
-              "id" : "$campaign.getId()"
+            #if($campaign.getIabs())
+              "iabs" : "$campaign.getIabs()"
               #if($campaign.getAdId() || $campaign.getCampaignId()),#end
             #end
  	   	    #if($campaign.getCampaignId())

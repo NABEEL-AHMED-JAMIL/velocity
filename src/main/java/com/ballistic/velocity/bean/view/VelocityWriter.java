@@ -7,9 +7,9 @@ import org.apache.velocity.app.VelocityEngine;
 
 import java.io.StringWriter;
 
-                        /* * * * * * * * * * * * * * * * * * * *
-                         * Note :- VelocityWriter Section Done *
-                         * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * *
+ * Note :- VelocityWriter Section Done *
+ * * * * * * * * * * * * * * * * * * * */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Note :- For New Template Integration
  * 1) add the view file into the view folder
@@ -23,8 +23,10 @@ import java.io.StringWriter;
 public abstract class VelocityWriter {
 
     private static final Logger logger = LogManager.getLogger(VelocityWriter.class);
+
     public static final String BID_TEMPLATE_PATH = "templates/bid.vm";
     public static final String EMAIL_TEMPLATE_PATH = "templates/email.vm";
+    public static final String BAD_REQUEST_TEMPLATE_PATH = "templates/bad-reqeust.vm";
     /*  create a context and add data */
     public VelocityEngine engine = new VelocityEngine();
     /*  create a context and add data */
